@@ -1,24 +1,68 @@
-import { ThemeProvider } from "styled-components";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { appWithTranslation } from "next-i18next";
 
-import { GlobalStyle, AppWrapper } from "../components/styles/Global.styled";
-
+import {
+  AppWrapper,
+  AppLoader,
+  GlobalStyle,
+  MainWrapper,
+} from "../components/styles/Global.styled";
+import HeaderLoader from "../components/reusable/HeaderLoader";
+import GamesListLoader from "../components/reusable/GamesListLoader";
 import Layout from "../components/Layout/Layout";
+import Sidebar from "../components/Layout/Sidebar";
+import SingleGameLoader from "../components/reusable/SingleGameLoader";
+import useMediaQuery from "hooks/useMediaQuery";
 
-const theme = {};
+const MyApp = ({ Component, pageProps }) => {
+  const router = useRouter();
+  const [pageLoading, setPageLoading] = useState(false);
+  const [route, setRoute] = useState("");
+  const isSmallScreen = useMediaQuery(980);
 
-function MyApp({ Component, pageProps }) {
-    return (
-        <>
-            <GlobalStyle />
-            <ThemeProvider theme={theme}>
-                <AppWrapper>
-                    <Layout />
+  useEffect(() => {
+    const handleStart = (url) => {
+      setPageLoading(true);
+      setRoute(url);
+    };
+    const handleComplete = () => {
+      setPageLoading(false);
+    };
 
-                    <Component {...pageProps} />
-                </AppWrapper>
-            </ThemeProvider>
-        </>
-    );
-}
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
+  }, [router]);
 
-export default MyApp;
+  const isGameRoute = router?.route == "/games/[name]";
+
+  return (
+    <>
+      <GlobalStyle />
+      <AppWrapper>
+        <Layout />
+
+        <MainWrapper>
+          {!isSmallScreen && !isGameRoute && <Sidebar />}
+          {pageLoading ? (
+            <AppLoader>
+              {route.includes("/games/") ? (
+                <SingleGameLoader />
+              ) : (
+                <>
+                  <HeaderLoader />
+                  <GamesListLoader />
+                </>
+              )}
+            </AppLoader>
+          ) : (
+            <Component {...pageProps} />
+          )}
+        </MainWrapper>
+      </AppWrapper>
+    </>
+  );
+};
+
+export default appWithTranslation(MyApp);

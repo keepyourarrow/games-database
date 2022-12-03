@@ -1,33 +1,48 @@
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Head from "next/head";
 
-import { get } from "../api/api";
+import GamesContent from "components/Games/GamesContent";
 
-import Home from "../components/Home/Home";
+import { getPlatforms, discoverGames } from "api/get";
 
-export default function HomePage({ data, platforms }) {
-    return (
-        <div>
-            <Head>
-                <title>Video Game database</title>
-                <meta name="description" content="rawr clone" />
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
+const ORDER = "rating";
 
-            <Home data={data} platforms={platforms} />
-        </div>
-    );
-}
+const HomePage = ({ data, platforms }) => {
+  const { i18n } = useTranslation("common");
 
-export const getStaticProps = async () => {
-    const data = await get(`/games/lists/main?page_size=20&page=1&ordering=-rating&`);
+  return (
+    <div>
+      <Head>
+        <title>{i18n.t("homePage.pageTitle")}</title>
+        <meta name="description" content={i18n.t("rawgClone")} />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-    const platforms = await get(`/platforms/lists/parents?`);
-
-    return {
-        props: {
-            data: data?.results || [],
-            platforms: platforms?.results || [],
-        },
-        revalidate: 120,
-    };
+      <GamesContent
+        action={discoverGames}
+        data={data}
+        defaultOrder={ORDER}
+        title={i18n.t("homePage.title")}
+        platforms={platforms}
+        type="main"
+      />
+    </div>
+  );
 };
+
+export const getStaticProps = async ({ locale }) => {
+  const data = await discoverGames({ type: "main" });
+  const platforms = await getPlatforms();
+
+  return {
+    props: {
+      data: data?.results || [],
+      platforms: platforms?.results || [],
+      ...(await serverSideTranslations(locale, "i18n")),
+    },
+    revalidate: 120,
+  };
+};
+
+export default HomePage;
