@@ -1,6 +1,6 @@
 # Demo
 
-https://games-database.vercel.app/games
+https://games-database.vercel.app
 
 ## Technology
 
