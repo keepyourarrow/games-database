@@ -37,7 +37,7 @@ const Name = ({ games, info, platforms, tags, infoType, type }) => {
   );
 };
 
-export const getStaticProps = async ({ locale, params }) => {
+export const getServerSideProps = async ({ params, locale }) => {
   const found = INFO_TYPES.find((type) => params?.infoType == type);
 
   if (!found) {
@@ -71,14 +71,6 @@ export const getStaticProps = async ({ locale, params }) => {
       infoType: capitalize(params.name),
       ...(await serverSideTranslations(locale, "i18n")),
     },
-    revalidate: 120,
-  };
-};
-
-export const getStaticPaths = async () => {
-  return {
-    paths: [],
-    fallback: "blocking",
   };
 };
 

@@ -36,7 +36,7 @@ const CalendarPage = ({ data, year, month, platforms }) => {
   );
 };
 
-export const getStaticProps = async ({ locale, params }) => {
+export const getServerSideProps = async ({ locale, params }) => {
   const [year, month] = params.date.split("-");
   const date = `${year}/${month}`;
   const data = await getGamesByDate({ date });
@@ -52,13 +52,6 @@ export const getStaticProps = async ({ locale, params }) => {
       ...(await serverSideTranslations(locale, "i18n")),
     },
     revalidate: 120,
-  };
-};
-
-export const getStaticPaths = async () => {
-  return {
-    paths: [],
-    fallback: "blocking",
   };
 };
 

@@ -24,7 +24,7 @@ const SingleGame = ({ dlc, game, screenshots, similar }) => {
   );
 };
 
-export const getStaticProps = async ({ locale, params }) => {
+export const getServerSideProps = async ({ locale, params }) => {
   const [game, screenshots, similar, dlc] = await Promise.all([
     getGameDetails({ type: params.name }),
     getGameDetails({ type: `${params.name}/screenshots` }),
@@ -46,18 +46,6 @@ export const getStaticProps = async ({ locale, params }) => {
       dlc: dlc?.results || [],
       ...(await serverSideTranslations(locale, "i18n")),
     },
-    revalidate: 120,
-  };
-};
-
-export const getStaticPaths = async () => {
-  const data = await getGamesList();
-
-  const paths = data?.results.map((item) => ({ params: { name: item.name.toLowerCase() } }));
-
-  return {
-    paths: paths || [],
-    fallback: "blocking",
   };
 };
 
